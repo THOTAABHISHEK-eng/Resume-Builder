@@ -1,0 +1,232 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResumeBuilder Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+        .container { width: 100%; max-width: 1200px; }
+        .main-header { text-align: center; color: white; margin-bottom: 60px; }
+        .main-header h1 { font-size: 3rem; font-weight: 700; }
+        .main-header p { opacity: 0.85; margin-top: 10px; }
+        .options-row { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; }
+        .option-card {
+            background: rgba(255,255,255,0.1); backdrop-filter: blur(20px);
+            border-radius: 24px; padding: 40px; text-align: center;
+            border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: 0.4s; width: 300px;
+        }
+        .option-card:hover { transform: translateY(-12px); background: rgba(255,255,255,0.2); }
+        .option-icon { font-size: 4rem; color: white; margin-bottom: 20px; }
+        .option-card h3, .option-card p { color: white; }
+        .form-container {
+            display: none; margin: 0 auto; max-width: 450px;
+            background: white; padding: 40px; border-radius: 20px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+            animation: fadeIn 0.4s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .form-container.active { display: block; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { font-weight: 500; display: block; margin-bottom: 6px; color: #333; }
+        .form-input { width: 100%; padding: 12px; border-radius: 10px; border: 2px solid #ddd; font-family: inherit; font-size: 15px; }
+        .form-input:focus { outline: none; border-color: #667eea; }
+        .btn-primary {
+            width: 100%; padding: 14px; border: none; border-radius: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; font-size: 15px;
+        }
+        .btn-primary:hover { opacity: 0.9; transform: scale(1.02); }
+        .back-btn { width: 100%; margin-top: 12px; background: none; border: none; color: #667eea; cursor: pointer; font-weight: 500; font-size: 14px; }
+        .captcha-box { display: flex; gap: 10px; align-items: center; margin-bottom: 15px; }
+        .captcha-code {
+            flex-grow: 1; background: #f0f2f5; padding: 10px; text-align: center;
+            border-radius: 10px; font-weight: 700; letter-spacing: 4px; color: #444;
+            border: 1px dashed #667eea; font-size: 18px; user-select: none;
+        }
+        .refresh-captcha { background: #667eea; color: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; }
+        .msg { padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 0.9rem; text-align: center; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e9; color: #2e7d32; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+<div class="container" id="mainContainer">
+    <div id="landingView">
+        <header class="main-header">
+            <h1>ResumeBuilder Pro</h1>
+            <p>Create ATS-optimized resumes that get you hired</p>
+        </header>
+        <div class="options-row">
+            <div class="option-card" onclick="showForm('login')">
+                <i class="fas fa-user-lock option-icon"></i>
+                <h3>Login</h3>
+                <p>Access your saved resume</p>
+            </div>
+            <div class="option-card" onclick="guestMode()">
+                <i class="fas fa-user option-icon"></i>
+                <h3>Guest Mode</h3>
+                <p>No account needed</p>
+            </div>
+            <div class="option-card" onclick="showForm('signup')">
+                <i class="fas fa-user-plus option-icon"></i>
+                <h3>Sign Up</h3>
+                <p>Save your resume forever</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div class="form-container" id="loginForm">
+        <h2 style="margin-bottom:20px;">Welcome Back</h2>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="loginEmail" class="form-input" placeholder="you@email.com">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="loginPassword" class="form-input" placeholder="••••••••">
+        </div>
+        <button class="btn-primary" onclick="login()">Login</button>
+        <button class="back-btn" onclick="showLanding()">← Back to Options</button>
+        <div id="loginMsg"></div>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div class="form-container" id="signupForm">
+        <h2 style="margin-bottom:20px;">Create Account</h2>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="signupEmail" class="form-input" placeholder="you@email.com">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="signupPassword" class="form-input" placeholder="Min 6 characters">
+        </div>
+        <div class="form-group">
+            <label>Confirm Password</label>
+            <input type="password" id="signupConfirm" class="form-input" placeholder="Re-enter password">
+        </div>
+        <div class="captcha-box">
+            <div class="captcha-code" id="captchaCode">------</div>
+            <button class="refresh-captcha" onclick="generateCaptcha()"><i class="fas fa-sync-alt"></i></button>
+        </div>
+        <input type="text" id="captchaInput" class="form-input" placeholder="Enter CAPTCHA above" style="margin-bottom:5px;">
+        <button class="btn-primary" onclick="signup()">Create Account</button>
+        <button class="back-btn" onclick="showLanding()">← Back</button>
+        <div id="signupMsg"></div>
+    </div>
+</div>
+
+<script>
+let captchaValue = '';
+
+function showForm(type) {
+    document.getElementById('landingView').style.display = 'none';
+    document.getElementById('loginForm').classList.remove('active');
+    document.getElementById('signupForm').classList.remove('active');
+    document.getElementById(type + 'Form').classList.add('active');
+    if (type === 'signup') generateCaptcha();
+}
+
+function showLanding() {
+    document.getElementById('landingView').style.display = 'block';
+    document.getElementById('loginForm').classList.remove('active');
+    document.getElementById('signupForm').classList.remove('active');
+}
+
+function generateCaptcha() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    captchaValue = Array.from({length: 6}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    document.getElementById('captchaCode').innerText = captchaValue;
+}
+
+function guestMode() {
+    const guestEmail = 'guest_' + Date.now() + '@guest.local';
+    localStorage.setItem('email', guestEmail);
+    window.location.href = 'page2.html';
+}
+
+async function login() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const msg = document.getElementById('loginMsg');
+
+    if (!email || !password) { msg.className = 'msg error'; msg.innerText = 'Please fill all fields'; return; }
+
+    msg.className = 'msg'; msg.innerText = 'Logging in...';
+
+    try {
+    // Make sure this matches your Server PORT (5000)
+    const res = await fetch('http://localhost:5000/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+    });
+
+    if (res.ok) {
+        localStorage.setItem('email', email);
+        msg.className = 'msg success'; 
+        msg.innerText = 'Success! Redirecting...';
+        setTimeout(() => window.location.href = 'page2.html', 800);
+    } else {
+        const data = await res.json();
+        msg.className = 'msg error'; 
+        msg.innerText = data.error || 'Invalid Credentials';
+    }
+} catch (e) {
+    // This is where you see "Cannot connect"
+    msg.className = 'msg error';
+    msg.innerText = 'Cannot connect to server. Is it running on port 5000?';
+    console.error("Connection Error:", e);
+}
+}
+
+async function signup() {
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    const confirm = document.getElementById('signupConfirm').value;
+    const captcha = document.getElementById('captchaInput').value.trim().toUpperCase();
+    const msg = document.getElementById('signupMsg');
+
+    if (!email || !password || !confirm) { msg.className = 'msg error'; msg.innerText = 'Please fill all fields'; return; }
+    if (password.length < 6) { msg.className = 'msg error'; msg.innerText = 'Password must be at least 6 characters'; return; }
+    if (password !== confirm) { msg.className = 'msg error'; msg.innerText = 'Passwords do not match'; return; }
+    if (captcha !== captchaValue) { msg.className = 'msg error'; msg.innerText = 'Incorrect CAPTCHA'; generateCaptcha(); return; }
+
+    msg.className = 'msg'; msg.innerText = 'Creating account...';
+
+    try {
+        const res = await fetch('http://localhost:5000/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+});
+        const data = await res.json();
+
+        if (res.ok) {
+            localStorage.setItem('email', email);
+            msg.className = 'msg success'; msg.innerText = 'Account created! Redirecting...';
+            setTimeout(() => window.location.href = 'page2.html', 800);
+        } else {
+            msg.className = 'msg error'; msg.innerText = data.error || 'Signup failed';
+        }
+    } catch (e) {
+        msg.className = 'msg error'; msg.innerText = 'Cannot connect to server. Is it running?';
+    }
+}
+
+generateCaptcha();
+</script>
+</body>
+</html>
