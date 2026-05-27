@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step 2 - Personal Info</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif; min-height: 100vh;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex; align-items: center; justify-content: center; padding: 20px;
+        }
+        .container {
+            text-align: center; color: white;
+            background: rgba(255,255,255,0.15); backdrop-filter: blur(20px);
+            padding: 40px; border-radius: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            width: 100%; max-width: 420px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .logo {
+            width: 80px; height: 80px; background: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px; color: #764ba2; font-size: 2rem;
+        }
+        h1 { font-size: 1.8rem; margin-bottom: 8px; }
+        p { font-size: 0.9rem; opacity: 0.85; margin-bottom: 20px; }
+        .input-group { margin-bottom: 12px; }
+        input {
+            width: 100%; padding: 14px; border: none; border-radius: 12px;
+            outline: none; font-family: inherit; font-size: 15px;
+            background: rgba(255,255,255,0.9); color: #333;
+        }
+        input:focus { background: white; box-shadow: 0 0 0 3px rgba(102,126,234,0.4); }
+        .btn {
+            margin-top: 12px; width: 100%; padding: 14px; border: none;
+            border-radius: 12px; background: white; color: #764ba2;
+            font-weight: 700; cursor: pointer; transition: 0.3s;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .back-link { display: inline-block; margin-top: 15px; color: rgba(255,255,255,0.7); font-size: 0.85rem; cursor: pointer; }
+        .back-link:hover { color: white; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="logo"><i class="fas fa-user-tie"></i></div>
+    <h1>Personal Info</h1>
+    <p>Let's start with your basics</p>
+    <div class="input-group"><input type="text" id="name" placeholder="Full Name"></div>
+    <div class="input-group"><input type="email" id="emailDisplay" placeholder="Email Address" readonly></div>
+    <div class="input-group"><input type="tel" id="phone" placeholder="Phone Number"></div>
+    <button class="btn" onclick="saveAndContinue()">Next Step <i class="fas fa-arrow-right"></i></button>
+    <div class="back-link" onclick="window.location.href='page1.html'">← Back to Login</div>
+</div>
+
+<script>
+const userEmail = localStorage.getItem('email');
+if (!userEmail) window.location.href = 'page1.html';
+
+document.getElementById('emailDisplay').value = userEmail;
+
+async function saveAndContinue() {
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    if (!name) { alert('Please enter your name'); return; }
+
+    const parts = name.split(' ');
+    const firstName = parts[0];
+    const surname = parts.slice(1).join(' ') || '';
+
+    await fetch('http://localhost:5000/api/save-all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: userEmail, firstName, surname, phone })
+    });
+    window.location.href = 'page3.html';
+}
+</script>
+</body>
+</html>
