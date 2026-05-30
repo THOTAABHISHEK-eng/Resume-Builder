@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Choose Theme Color</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Inter', sans-serif; min-height: 100vh;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex; align-items: center; justify-content: center;
+    color: white; padding: 20px;
+}
+.container { text-align: center; max-width: 1100px; width: 95%; }
+h1 { font-size: 2.5rem; margin-bottom: 10px; font-weight: 700; }
+p { opacity: 0.85; margin-bottom: 30px; }
+.glass {
+    background: rgba(255,255,255,0.12); backdrop-filter: blur(25px);
+    padding: 30px; border-radius: 25px; box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+}
+.colors {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 15px; max-height: 400px; overflow-y: auto; padding: 10px;
+}
+.colors::-webkit-scrollbar { width: 6px; }
+.colors::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+.color-card {
+    height: 80px; border-radius: 15px; cursor: pointer;
+    position: relative; transition: 0.4s; box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    display: flex; align-items: center; justify-content: center;
+}
+.color-card:hover { transform: translateY(-8px) scale(1.05); }
+.color-card.selected { transform: scale(1.08); box-shadow: 0 0 0 3px white, 0 8px 20px rgba(0,0,0,0.3); }
+.color-card .check { color: white; font-size: 22px; opacity: 0; font-weight: bold; }
+.color-card.selected .check { opacity: 1; }
+.preview {
+    margin-top: 25px; height: 50px; border-radius: 12px;
+    transition: 0.4s; background: rgba(255,255,255,0.1);
+}
+button {
+    margin-top: 25px; padding: 15px 45px; border: none;
+    border-radius: 15px; font-weight: 600; cursor: pointer;
+    background: white; color: #333; transition: 0.3s; font-size: 16px;
+}
+button:hover { transform: translateY(-4px); box-shadow: 0 15px 30px rgba(0,0,0,0.3); }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Choose Your Theme</h1>
+    <p>Pick a professional color for your resume</p>
+    <div class="glass">
+        <div class="colors" id="colors"></div>
+        <div class="preview" id="preview"></div>
+    </div>
+    <button onclick="next()">Continue</button>
+</div>
+
+<script>
+const userEmail = localStorage.getItem('email');
+if (!userEmail) window.location.href = 'page1.html';
+
+const themes = [
+    { name: 'Purple', color: '#667eea', g: ['#667eea','#764ba2'] },
+    { name: 'Coral', color: '#ff7e5f', g: ['#ff7e5f','#feb47b'] },
+    { name: 'Teal', color: '#43cea2', g: ['#43cea2','#185a9d'] },
+    { name: 'Orange', color: '#ff9966', g: ['#ff9966','#ff5e62'] },
+    { name: 'Sky', color: '#00c6ff', g: ['#00c6ff','#0072ff'] },
+    { name: 'Gold', color: '#f7971e', g: ['#f7971e','#ffd200'] },
+    { name: 'Violet', color: '#8e2de2', g: ['#8e2de2','#4a00e0'] },
+    { name: 'Green', color: '#11998e', g: ['#11998e','#38ef7d'] },
+    { name: 'Pink', color: '#fc466b', g: ['#fc466b','#3f5efb'] },
+    { name: 'Red', color: '#ee0979', g: ['#ee0979','#ff6a00'] },
+    { name: 'Charcoal', color: '#232526', g: ['#232526','#414345'] },
+    { name: 'Forest', color: '#134e5e', g: ['#134e5e','#71b280'] },
+    { name: 'Navy', color: '#1e3a8a', g: ['#1e3a8a','#3b82f6'] },
+    { name: 'Emerald', color: '#064e3b', g: ['#064e3b','#10b981'] },
+    { name: 'Crimson', color: '#4c0519', g: ['#4c0519','#be123c'] },
+    { name: 'Indigo', color: '#312e81', g: ['#312e81','#6366f1'] },
+    { name: 'Deep Purple', color: '#2e1065', g: ['#2e1065','#8b5cf6'] },
+    { name: 'Midnight', color: '#020617', g: ['#020617','#1e293b'] },
+    { name: 'Cyan', color: '#164e63', g: ['#164e63','#06b6d4'] },
+    { name: 'Grape', color: '#581c87', g: ['#581c87','#a855f7'] },
+    { name: 'Lime', color: '#3f6212', g: ['#3f6212','#84cc16'] },
+    { name: 'Rose', color: '#831843', g: ['#831843','#ec4899'] },
+    { name: 'Ocean', color: '#0f172a', g: ['#0f172a','#0ea5e9'] },
+    { name: 'Black', color: '#000000', g: ['#000000','#434343'] }
+];
+
+let selectedColor = localStorage.getItem('color') || '#667eea';
+const container = document.getElementById('colors');
+
+themes.forEach(t => {
+    const card = document.createElement('div');
+    card.className = 'color-card' + (t.color === selectedColor ? ' selected' : '');
+    card.style.background = `linear-gradient(135deg, ${t.g[0]}, ${t.g[1]})`;
+    card.innerHTML = `<span class="check">✓</span>`;
+    card.title = t.name;
+    card.onclick = () => {
+        document.querySelectorAll('.color-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        selectedColor = t.color;
+        localStorage.setItem('color', t.color);
+        document.getElementById('preview').style.background = `linear-gradient(135deg, ${t.g[0]}, ${t.g[1]})`;
+    };
+    container.appendChild(card);
+});
+
+// Set initial preview
+const initial = themes.find(t => t.color === selectedColor) || themes[0];
+document.getElementById('preview').style.background = `linear-gradient(135deg, ${initial.g[0]}, ${initial.g[1]})`;
+
+async function next() {
+    await fetch('http://localhost:5000/api/save-all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: userEmail, theme: selectedColor })
+    });
+    window.location.href = 'page4.html';
+}
+</script>
+</body>
+</html>
