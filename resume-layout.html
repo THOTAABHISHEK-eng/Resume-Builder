@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Select Resume Type</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --primary: #667eea; --secondary: #764ba2; }
+body {
+    font-family: 'Inter', sans-serif; min-height: 100vh;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.container { text-align: center; color: white; max-width: 1100px; width: 95%; }
+h1 { font-size: 2.5rem; margin-bottom: 10px; }
+p { opacity: 0.85; margin-bottom: 40px; }
+.templates { display: flex; gap: 40px; justify-content: center; flex-wrap: wrap; }
+.template {
+    width: 300px; background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(25px); border-radius: 20px; padding: 25px;
+    cursor: pointer; transition: 0.4s; box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+    border: 3px solid transparent;
+}
+.template:hover { transform: scale(1.03) translateY(-8px); }
+.template.selected { border-color: white; box-shadow: 0 0 30px rgba(255,255,255,0.3); }
+.header-box { height: 40px; border-radius: 8px; margin-bottom: 15px; background: rgba(255,255,255,0.3); }
+.line { height: 8px; background: rgba(255,255,255,0.2); margin: 8px 0; border-radius: 4px; }
+.photo-circle {
+    width: 80px; height: 80px; border-radius: 50%; margin: auto;
+    background: rgba(255,255,255,0.2); border: 3px solid rgba(255,255,255,0.4);
+}
+.template-label { margin-top: 15px; font-weight: 700; font-size: 14px; }
+button {
+    margin-top: 40px; padding: 15px 45px; border: none; border-radius: 14px;
+    font-weight: 700; cursor: pointer; background: white; color: #333;
+    transition: 0.3s; font-size: 16px;
+}
+button:hover { transform: translateY(-4px); box-shadow: 0 15px 30px rgba(0,0,0,0.3); }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Select Resume Layout</h1>
+    <p>Choose the structure that best fits your career goals</p>
+    <div class="templates">
+        <div class="template" onclick="pick(this,'no-photo')">
+            <div class="header-box"></div>
+            <div class="line" style="width:100%"></div>
+            <div class="line" style="width:90%"></div>
+            <div class="line" style="width:95%"></div>
+            <div class="line" style="width:60%"></div>
+            <div class="template-label">ATS FRIENDLY</div>
+        </div>
+        <div class="template" onclick="pick(this,'photo')">
+            <div class="photo-circle"></div>
+            <div class="line" style="width:60%;margin:12px auto;"></div>
+            <div class="line"></div>
+            <div class="line" style="width:90%"></div>
+            <div class="template-label">MODERN LAYOUT</div>
+        </div>
+    </div>
+    <button onclick="next()">Continue</button>
+</div>
+
+<script>
+const userEmail = localStorage.getItem('email');
+if (!userEmail) window.location.href = 'page1.html';
+
+// Apply saved theme
+const color = localStorage.getItem('color');
+if (color) {
+    document.documentElement.style.setProperty('--primary', color);
+}
+
+let selected = localStorage.getItem('templateType') || '';
+if (selected) {
+    document.querySelectorAll('.template').forEach(t => {
+        if (t.dataset.val === selected) t.classList.add('selected');
+    });
+}
+
+function pick(el, val) {
+    document.querySelectorAll('.template').forEach(t => t.classList.remove('selected'));
+    el.classList.add('selected');
+    selected = val;
+    localStorage.setItem('templateType', val);
+}
+
+async function next() {
+    if (!selected) { alert('Please select a layout!'); return; }
+    await fetch('http://localhost:5000/api/save-all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: userEmail, layout: selected })
+    });
+    window.location.href = 'page5.html';
+}
+</script>
+</body>
+</html>
