@@ -1,0 +1,147 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Select Profession</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.container { max-width: 1100px; width: 100%; text-align: center; color: white; }
+h2 { font-size: 2.5rem; margin-bottom: 10px; font-weight: 700; }
+p { opacity: 0.85; margin-bottom: 20px; }
+.grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 14px; max-height: 360px; overflow-y: auto; margin-bottom: 25px; padding: 10px;
+}
+.grid::-webkit-scrollbar { width: 6px; }
+.grid::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+.card {
+    padding: 18px 14px; background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(25px); border-radius: 16px; cursor: pointer;
+    transition: 0.3s; border: 1px solid rgba(255,255,255,0.1);
+    font-weight: 500; font-size: 14px;
+}
+.card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.2); }
+.card.selected { background: white !important; color: #764ba2 !important; font-weight: 700; transform: scale(1.05); }
+.custom-box {
+    max-width: 550px; margin: 15px auto;
+    background: rgba(255,255,255,0.15); padding: 18px; border-radius: 20px;
+}
+.input-group { display: flex; gap: 10px; }
+input {
+    flex: 1; padding: 14px 18px; border: none; border-radius: 14px;
+    outline: none; font-size: 15px; color: #333;
+}
+.add-btn {
+    padding: 0 20px; background: white; color: #764ba2;
+    border-radius: 14px; border: none; cursor: pointer; font-weight: 700;
+}
+.continue-btn {
+    margin-top: 25px; padding: 16px 55px; border: none; border-radius: 14px;
+    font-weight: 700; cursor: pointer; background: white; color: #333;
+    transition: 0.3s; font-size: 16px;
+}
+.continue-btn:hover { transform: translateY(-4px); box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
+</style>
+</head>
+<body>
+<div class="container">
+    <h2>Select Your Profession</h2>
+    <p>Choose your role or add a custom one</p>
+    <div class="grid" id="grid"></div>
+    <div class="custom-box">
+        <div class="input-group">
+            <input type="text" id="customInput" placeholder="Enter custom profession...">
+            <button class="add-btn" onclick="addCustom()">Add</button>
+        </div>
+    </div>
+    <button class="continue-btn" onclick="next()">Continue</button>
+</div>
+
+<script>
+const userEmail = localStorage.getItem('email');
+if (!userEmail) window.location.href = 'page1.html';
+
+const professions = [
+    'Software Engineer', 'Frontend Developer', 'Backend Developer', 'Full Stack Developer',
+    'Data Scientist', 'UI/UX Designer', 'Product Manager', 'Mobile App Developer',
+    'DevOps Engineer', 'Cybersecurity Analyst', 'QA Engineer', 'Cloud Architect',
+    'Machine Learning Engineer', 'Database Administrator', 'Network Engineer', 'IT Consultant'
+];
+
+const grid = document.getElementById('grid');
+// Initialize as an array to hold multiple values
+let selectedProfessions = [];
+
+function renderProfessions(list) {
+    grid.innerHTML = '';
+    list.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'card' + (selectedProfessions.includes(p) ? ' selected' : '');
+        card.innerText = p;
+        card.onclick = () => {
+            if (selectedProfessions.includes(p)) {
+                // Deselect if already in the list
+                selectedProfessions = selectedProfessions.filter(item => item !== p);
+                card.classList.remove('selected');
+            } else {
+                // Add to list
+                selectedProfessions.push(p);
+                card.classList.add('selected');
+            }
+        };
+        grid.appendChild(card);
+    });
+}
+
+renderProfessions(professions);
+
+function addCustom() {
+    const val = document.getElementById('customInput').value.trim();
+    if (!val) return;
+    document.getElementById('customInput').value = '';
+    
+    if (!selectedProfessions.includes(val)) {
+        selectedProfessions.push(val);
+        const card = document.createElement('div');
+        card.className = 'card selected';
+        card.innerText = val;
+        card.onclick = () => {
+            selectedProfessions = selectedProfessions.filter(item => item !== val);
+            card.remove();
+        };
+        grid.insertBefore(card, grid.firstChild);
+    }
+}
+
+async function next() {
+    if (selectedProfessions.length === 0) { 
+        alert('Please select at least one profession!'); 
+        return; 
+    }
+    
+    // Join multiple selections into one string for the database
+    const professionString = selectedProfessions.join(', ');
+    localStorage.setItem('profession', professionString);
+
+    try {
+        await fetch('http://localhost:5000/api/save-all', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: userEmail, profession: professionString })
+        });
+        window.location.href = 'page6.html';
+    } catch (e) {
+        console.error("Save failed", e);
+        window.location.href = 'page6.html'; // Move forward anyway if local works
+    }
+}
+</script>
+</body>
+</html>
