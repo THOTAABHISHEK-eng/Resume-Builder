@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Details</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --primary: #667eea; --secondary: #764ba2; }
+        body {
+            font-family: 'Inter', sans-serif; min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex; align-items: center; justify-content: center; padding: 20px;
+        }
+        .container { width: 100%; max-width: 750px; }
+        .form-box {
+            background: rgba(255,255,255,0.15); backdrop-filter: blur(25px);
+            padding: 40px; border-radius: 25px; color: white;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+        }
+        h1 { text-align: center; margin-bottom: 8px; font-weight: 700; }
+        .sub { text-align: center; opacity: 0.8; font-size: 0.9rem; margin-bottom: 30px; }
+        .photo-upload { text-align: center; margin-bottom: 30px; }
+        .photo-upload input { display: none; }
+        .photo-box {
+            width: 130px; height: 130px; border-radius: 50%;
+            border: 3px dashed rgba(255,255,255,0.4);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; margin: auto; transition: 0.3s; overflow: hidden;
+            background: rgba(255,255,255,0.05);
+        }
+        .photo-box:hover { background: rgba(255,255,255,0.2); border-color: white; }
+        .photo-box img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        input[type=text], input[type=email], input[type=tel] {
+            width: 100%; padding: 15px 18px; border: none; border-radius: 12px;
+            outline: none; font-size: 15px; color: #333; background: white;
+        }
+        .full { grid-column: span 2; }
+        .btn-group { margin-top: 30px; display: flex; gap: 12px; }
+        .next-btn {
+            flex: 2; padding: 16px; border: none; border-radius: 14px;
+            background: white; color: #333; font-weight: 700; cursor: pointer; transition: 0.3s;
+        }
+        .back-btn {
+            flex: 1; padding: 16px; border-radius: 14px;
+            background: transparent; border: 1px solid rgba(255,255,255,0.4); color: white;
+            font-weight: 600; cursor: pointer; transition: 0.3s;
+        }
+        button:hover { transform: translateY(-3px); }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="form-box">
+        <h1>Personal Details</h1>
+        <p class="sub">Fill in your contact information</p>
+
+        <div class="photo-upload">
+            <label for="photoInput">
+                <div class="photo-box" id="photoBox">
+                    <img id="photoPreview">
+                    <i class="fas fa-camera" id="camIcon" style="font-size:1.8rem;margin-bottom:6px;"></i>
+                    <span id="uploadText" style="font-size:11px;font-weight:600;">UPLOAD PHOTO</span>
+                </div>
+            </label>
+            <input type="file" id="photoInput" accept="image/*" onchange="handlePhoto(this)">
+        </div>
+
+        <div class="grid">
+            <input type="text" id="firstName" placeholder="First Name">
+            <input type="text" id="surname" placeholder="Surname">
+            <input type="text" id="city" placeholder="City">
+            <input type="text" id="country" placeholder="Country">
+            <input type="text" id="pin" placeholder="Pin Code">
+            <input type="tel" id="phone" placeholder="Phone Number">
+            <input type="email" id="emailField" class="full" placeholder="Email Address">
+        </div>
+
+        <div class="btn-group">
+            <button class="back-btn" onclick="window.location.href='page6.html'">Back</button>
+            <button class="next-btn" onclick="nextPage()">Continue →</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const userEmail = localStorage.getItem('email');
+if (!userEmail) window.location.href = 'page1.html';
+
+// Pre-fill email
+document.getElementById('emailField').value = userEmail;
+
+// Load saved data
+window.onload = async () => {
+    try {
+        const res = await fetch('/api/get-resume/' + userEmail);
+        const data = await res.json();
+        if (data.firstName) document.getElementById('firstName').value = data.firstName;
+        if (data.surname) document.getElementById('surname').value = data.surname;
+        if (data.phone) document.getElementById('phone').value = data.phone;
+        if (data.city) document.getElementById('city').value = data.city;
+        if (data.country) document.getElementById('country').value = data.country;
+        if (data.photo) {
+            document.getElementById('photoPreview').src = data.photo;
+            document.getElementById('photoPreview').style.display = 'block';
+            document.getElementById('camIcon').style.display = 'none';
+            document.getElementById('uploadText').style.display = 'none';
+        }
+    } catch(e) {}
+};
+
+function handlePhoto(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async () => {
+        document.getElementById('photoPreview').src = reader.result;
+        document.getElementById('photoPreview').style.display = 'block';
+        document.getElementById('camIcon').style.display = 'none';
+        document.getElementById('uploadText').style.display = 'none';
+        await fetch('http://localhost:5000/api/save-all', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: userEmail, photo: reader.result })
+        });
+    };
+    reader.readAsDataURL(file);
+}
+
+async function nextPage() {
+    const firstName = document.getElementById('firstName').value.trim();
+    if (!firstName) { alert('Please enter your first name'); return; }
+
+    await fetch('/api/save-all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            email: userEmail,
+            firstName: firstName,
+            surname: document.getElementById('surname').value.trim(),
+            phone: document.getElementById('phone').value.trim(),
+            city: document.getElementById('city').value.trim(),
+            country: document.getElementById('country').value.trim()
+        })
+    });
+    window.location.href = 'page8.html';
+}
+</script>
+</body>
+</html>
