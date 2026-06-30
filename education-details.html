@@ -1,0 +1,251 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Education Details</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><style>
+  
+    * { margin:0; padding:0; box-sizing:border-box; }
+  
+    :root { --primary:#667eea; --secondary:#764ba2; }
+  
+    body {
+  
+        font-family:'Inter',sans-serif; min-height:100vh;
+  
+        background:linear-gradient(135deg,var(--primary),var(--secondary));
+  
+        display:flex; align-items:center; justify-content:center; padding:20px;
+  
+    }
+  
+    .container { max-width:900px; width:100%; }
+  
+    .box {
+  
+        background:rgba(255,255,255,0.15); backdrop-filter:blur(25px);
+  
+        padding:40px; border-radius:25px; color:white;
+  
+        box-shadow:0 30px 60px rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1);
+  
+    }
+  
+    h1 { text-align:center; margin-bottom:25px; font-weight:700; }
+  
+    .edu-card {
+  
+        background:rgba(255,255,255,0.1); padding:22px; border-radius:18px;
+  
+        margin-bottom:18px; position:relative; border:1px solid rgba(255,255,255,0.1);
+  
+        animation:fadeIn 0.4s ease;
+  
+    }
+  
+    @keyframes fadeIn { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+  
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  
+    input, textarea {
+  
+        padding:13px; border:none; border-radius:10px; outline:none;
+  
+        font-size:14px; width:100%; color:#333; font-family:inherit;
+  
+    }
+  
+    textarea { height:80px; resize:none; }
+  
+    .full { grid-column:span 2; }
+  
+    .remove-btn {
+  
+        position:absolute; top:-10px; right:-10px; background:#ff4b2b;
+  
+        color:white; border:none; width:30px; height:30px; border-radius:50%;
+  
+        cursor:pointer; display:flex; align-items:center; justify-content:center;
+  
+    }
+  
+    .add-btn {
+  
+        background:rgba(255,255,255,0.2); color:white; width:100%;
+  
+        margin-bottom:18px; border:2px dashed rgba(255,255,255,0.4);
+  
+        padding:14px; border-radius:12px; cursor:pointer; font-weight:700;
+  
+    }
+  
+    .controls { display:flex; gap:15px; }
+  
+    .next-btn { background:white; color:#333; flex:2; padding:15px; border:none; border-radius:12px; cursor:pointer; font-weight:700; }
+  
+    .back-btn { background:transparent; border:1px solid white; color:white; flex:1; padding:15px; border-radius:12px; cursor:pointer; font-weight:600; }
+  
+    button:hover { transform:translateY(-2px); }
+  
+</style></head><body><div class="container"><div class="box">
+
+    <h1>Education Details</h1>
+
+    <div id="educationContainer"></div>
+
+    <button class="add-btn" onclick="addEducation()"><i class="fas fa-plus"></i> Add Education</button>
+
+    <div class="controls">
+
+        <button class="back-btn" onclick="window.location.href='page8.html'">Back</button>
+
+        <button class="next-btn" onclick="saveAndNext()">Continue</button>
+
+    </div>
+
+</div>
+
+</div><script>
+  
+const userEmail = localStorage.getItem('email');
+  
+if (!userEmail) window.location.href = 'page1.html';
+  
+
+  
+function addEducation() {
+  
+    const container = document.getElementById('educationContainer');
+  
+    const div = document.createElement('div');
+  
+    div.className = 'edu-card';
+  
+    div.innerHTML = `
+  
+        <button class="remove-btn" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+  
+        <div class="grid">
+  
+            <input type="text" placeholder="Degree (B.Tech, MBA, etc)" class="degree">
+  
+            <input type="text" placeholder="Institution Name" class="school">
+  
+            <input type="text" placeholder="Field of Study" class="field">
+  
+            <input type="text" placeholder="Start Year" class="startYear">
+  
+            <input type="text" placeholder="End Year" class="endYear">
+  
+            <input type="text" placeholder="City" class="city">
+  
+            <input type="text" placeholder="Country" class="country">
+  
+            <textarea placeholder="Achievements, GPA, etc" class="full description"></textarea></div>`;
+
+container.appendChild(div);
+
+}
+
+async function saveAndNext() {
+
+const cards = document.querySelectorAll('.edu-card');
+
+const list = [];
+
+cards.forEach(card => {
+
+    const degree = card.querySelector('.degree').value.trim();
+
+    const school = card.querySelector('.school').value.trim();
+
+    if (degree || school) {
+
+        list.push({
+
+            degree, school,
+
+            field: card.querySelector('.field').value.trim(),
+
+            startYear: card.querySelector('.startYear').value.trim(),
+
+            endYear: card.querySelector('.endYear').value.trim(),
+
+            city: card.querySelector('.city').value.trim(),
+
+            country: card.querySelector('.country').value.trim(),
+
+            description: card.querySelector('.description').value.trim()
+
+        });
+
+    }
+
+});
+
+
+
+if (list.length === 0) { alert('Please add at least one education entry!'); return; }
+
+
+
+localStorage.setItem('educationData', JSON.stringify(list));
+
+
+
+await fetch('http://localhost:5000/api/save-all', {
+
+    method: 'POST',
+
+    headers: { 'Content-Type': 'application/json' },
+
+    body: JSON.stringify({ email: userEmail, education: list })
+
+});
+
+
+
+window.location.href = 'page10.html';
+
+}
+
+window.onload = () => {
+
+const saved = localStorage.getItem('educationData');
+
+if (saved) {
+
+    const data = JSON.parse(saved);
+
+    if (data.length > 0) {
+
+        data.forEach(item => {
+
+            addEducation();
+
+            const last = document.querySelector('#educationContainer').lastElementChild;
+
+            last.querySelector('.degree').value = item.degree || '';
+
+            last.querySelector('.school').value = item.school || '';
+
+            last.querySelector('.field').value = item.field || '';
+
+            last.querySelector('.startYear').value = item.startYear || '';
+
+            last.querySelector('.endYear').value = item.endYear || '';
+
+            last.querySelector('.city').value = item.city || '';
+
+            last.querySelector('.country').value = item.country || '';
+
+            last.querySelector('.description').value = item.description || '';
+
+        });
+
+        return;
+
+    }
+
+}
+
+addEducation();
+
+};
+
+</script></body></html>
