@@ -1,0 +1,247 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Skills</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><style>
+  
+    * { margin:0; padding:0; box-sizing:border-box; }
+  
+    :root { --primary:#667eea; --secondary:#764ba2; }
+  
+    body {
+  
+        font-family:'Inter',sans-serif; min-height:100vh;
+  
+        background:linear-gradient(135deg,var(--primary),var(--secondary));
+  
+        display:flex; align-items:center; justify-content:center; padding:20px;
+  
+    }
+  
+    .container { max-width:850px; width:100%; }
+  
+    .box {
+  
+        background:rgba(255,255,255,0.15); backdrop-filter:blur(25px);
+  
+        padding:40px; border-radius:25px; color:white;
+  
+        box-shadow:0 30px 60px rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1);
+  
+    }
+  
+    h1 { text-align:center; margin-bottom:8px; font-weight:700; }
+  
+    p.sub { text-align:center; opacity:0.8; margin-bottom:25px; font-size:0.9rem; }
+  
+    .selected-skills {
+  
+        display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px;
+  
+        min-height:50px; padding:14px;
+  
+        background:rgba(0,0,0,0.1); border-radius:14px;
+  
+    }
+  
+    .skill-tag {
+  
+        background:white; color:#333; padding:7px 14px; border-radius:25px;
+  
+        display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600;
+  
+        animation:popIn 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+  
+    }
+  
+    .skill-tag i { color:#ff4b2b; cursor:pointer; }
+  
+    .suggestions-label { font-size:0.75rem; font-weight:700; margin-bottom:10px; display:block; text-transform:uppercase; letter-spacing:1px; }
+  
+    .suggestions { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:25px; }
+  
+    .suggestion-pill {
+  
+        background:rgba(255,255,255,0.12); padding:7px 15px; border-radius:20px;
+  
+        cursor:pointer; transition:0.3s; border:1px solid rgba(255,255,255,0.2); font-size:13px;
+  
+    }
+  
+    .suggestion-pill:hover { background:white; color:var(--secondary); transform:translateY(-2px); }
+  
+    .input-box { display:flex; gap:10px; margin-bottom:20px; }
+  
+    input { flex:1; padding:14px; border:none; border-radius:12px; outline:none; font-size:15px; color:#333; }
+  
+    .actions { display:flex; gap:15px; }
+  
+    .add-btn { background:white; color:var(--primary); padding:14px 20px; border:none; border-radius:12px; cursor:pointer; font-weight:700; }
+  
+    .next-btn { background:white; color:#333; flex:2; padding:15px; border:none; border-radius:12px; cursor:pointer; font-weight:700; }
+  
+    .back-btn { background:transparent; border:1px solid white; color:white; flex:1; padding:15px; border-radius:12px; cursor:pointer; font-weight:600; }
+  
+    button:hover { transform:translateY(-2px); }
+  
+    @keyframes popIn { from{opacity:0;transform:scale(0.5);} to{opacity:1;transform:scale(1);} }
+  
+</style></head><body><div class="container"><div class="box">
+
+    <h1>Skills & Expertise</h1>
+
+    <p class="sub">Highlight your top professional and technical skills</p>
+
+    <div class="selected-skills" id="selectedSkills"></div>
+
+    <span class="suggestions-label">Popular Suggestions</span>
+
+    <div class="suggestions" id="suggestions"></div>
+
+    <div class="input-box">
+
+        <input type="text" id="customSkill" placeholder="Type a custom skill...">
+
+        <button class="add-btn" onclick="addCustom()">Add</button>
+
+    </div>
+
+    <div class="actions">
+
+        <button class="back-btn" onclick="window.location.href='page9.html'">Back</button>
+
+        <button class="next-btn" onclick="next()">Continue</button>
+
+    </div>
+
+</div>
+
+</div><script>
+  
+const userEmail = localStorage.getItem('email');
+  
+if (!userEmail) window.location.href = 'page1.html';
+  
+
+  
+const skillList = [
+  
+    'Java','Python','C++','JavaScript','HTML','CSS','React','Node.js','SQL','MongoDB',
+  
+    'Machine Learning','AI','Data Analysis','Power BI','Communication','Leadership',
+  
+    'Teamwork','Problem Solving','Time Management','Creativity','Git',
+  
+    'Cloud Computing','Cybersecurity','Docker','Linux','REST APIs'
+  
+];
+  
+
+  
+let selected = JSON.parse(localStorage.getItem('skills') || '[]');
+  
+
+  
+function init() {
+  
+    const suggestionsDiv = document.getElementById('suggestions');
+  
+    skillList.forEach(skill => {
+  
+        const el = document.createElement('div');
+  
+        el.className = 'suggestion-pill';
+  
+        el.innerText = skill;
+  
+        el.onclick = () => addSkill(skill);
+  
+        suggestionsDiv.appendChild(el);
+  
+    });
+  
+    renderSkills();
+  
+}
+  
+
+  
+function addSkill(skill) {
+  
+    if (selected.includes(skill)) return;
+  
+    selected.push(skill);
+  
+    renderSkills();
+  
+}
+  
+
+  
+function removeSkill(skill) {
+  
+    selected = selected.filter(s => s !== skill);
+  
+    renderSkills();
+  
+}
+  
+
+  
+function renderSkills() {
+  
+    const container = document.getElementById('selectedSkills');
+  
+    container.innerHTML = selected.length === 0
+  
+        ? "<span style='opacity:0.5;font-size:13px;'>No skills selected yet...</span>" : '';
+  
+    selected.forEach(skill => {
+  
+        const div = document.createElement('div');
+  
+        div.className = 'skill-tag';
+  
+        div.innerHTML = `${skill} <i class="fas fa-times-circle" onclick="removeSkill('${skill}')"></i>`;
+  
+        container.appendChild(div);
+  
+    });
+  
+}
+  
+
+  
+function addCustom() {
+  
+    const input = document.getElementById('customSkill');
+  
+    const val = input.value.trim();
+  
+    if (val && !selected.includes(val)) { selected.push(val); renderSkills(); input.value = ''; }
+  
+}
+  
+
+  
+async function next() {
+  
+    if (selected.length === 0) { alert('Please select at least one skill!'); return; }
+  
+    localStorage.setItem('skills', JSON.stringify(selected));
+  
+    await fetch('http://localhost:5000/api/save-all', {
+  
+        method: 'POST',
+  
+        headers: { 'Content-Type': 'application/json' },
+  
+        body: JSON.stringify({ email: userEmail, skills: selected.join(', ') })
+  
+    });
+  
+    window.location.href = 'page11.html';
+  
+}
+  
+
+  
+init();
+  
+</script></body></html>
