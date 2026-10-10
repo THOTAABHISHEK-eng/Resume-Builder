@@ -1,0 +1,171 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Professional Summary</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root { --primary: #667eea; --secondary: #764ba2; }
+
+    body {
+
+        font-family: 'Inter', sans-serif; min-height: 100vh;
+
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+
+        display: flex; align-items: center; justify-content: center; padding: 20px;
+
+    }
+
+    .container { max-width: 850px; width: 100%; }
+
+    .box {
+
+        background: rgba(255,255,255,0.15); backdrop-filter: blur(25px);
+
+        padding: 40px; border-radius: 25px; color: white;
+
+        box-shadow: 0 30px 60px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+
+    }
+
+    h1 { text-align: center; margin-bottom: 8px; font-weight: 700; }
+
+    p.sub { text-align: center; opacity: 0.85; margin-bottom: 22px; font-size: 0.95rem; }
+
+    textarea {
+
+        width: 100%; height: 175px; padding: 18px; border: none; border-radius: 14px;
+
+        outline: none; resize: none; font-size: 15px; color: #2d3436; line-height: 1.6;
+
+        font-family: inherit;
+
+    }
+
+    .suggestions-label { font-size: 0.75rem; font-weight: 800; margin: 22px 0 10px; display: block; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
+
+    .suggestions { display: grid; gap: 10px; }
+
+    .suggestion {
+
+        background: rgba(255,255,255,0.1); padding: 16px; border-radius: 14px;
+
+        cursor: pointer; transition: 0.3s; border: 1px solid rgba(255,255,255,0.1); font-size: 14px; line-height: 1.5;
+
+    }
+
+    .suggestion:hover { background: white; color: var(--primary); transform: translateX(8px); }
+
+    .actions { display: flex; gap: 15px; margin-top: 30px; }
+
+    .next-btn { background: white; color: #333; flex: 2; padding: 16px; border: none; border-radius: 14px; cursor: pointer; font-weight: 700; font-size: 15px; }
+
+    .back-btn { background: transparent; border: 1px solid white; color: white; flex: 1; padding: 16px; border-radius: 14px; cursor: pointer; font-weight: 600; }
+
+    button:hover { transform: translateY(-3px); }
+
+</style>
+
+</head><body><div class="container"><div class="box">
+
+    <h1>Professional Summary</h1>
+
+    <p class="sub">Briefly describe your career goals and key strengths</p>
+
+    <textarea id="summary" placeholder="Write your summary or pick a suggestion below..."></textarea>
+
+    <span class="suggestions-label">Personalized Suggestions</span>
+
+    <div class="suggestions" id="suggestionBox"></div>
+
+    <div class="actions">
+
+        <button class="back-btn" onclick="window.location.href='page10.html'">Back</button>
+
+        <button class="next-btn" onclick="next()">Continue</button>
+
+    </div>
+
+</div>
+
+</div><script>
+  
+const userEmail = localStorage.getItem('email');
+  
+if (!userEmail) window.location.href = 'page1.html';
+  
+
+  
+const role = localStorage.getItem('profession') || 'Professional';
+  
+
+  
+const suggestions = [
+  
+    `Detail-oriented ${role} with a strong foundation in technology and software development. Proven ability to solve complex problems and eager to contribute to innovative projects.`,
+  
+    `Results-driven ${role} specializing in modern technologies. Seeking an opportunity to apply technical skills in a dynamic real-world development environment.`,
+  
+    `Aspiring ${role} dedicated to continuous learning and staying updated with emerging technologies. Strong analytical thinking and passion for building efficient solutions.`,
+  
+    `Motivated ${role} with excellent communication and teamwork skills, eager to contribute to organizational success and continuously grow professionally.`
+  
+];
+  
+
+  
+const box = document.getElementById('suggestionBox');
+  
+suggestions.forEach(text => {
+  
+    const div = document.createElement('div');
+  
+    div.className = 'suggestion';
+  
+    div.innerText = text;
+  
+    div.onclick = () => { document.getElementById('summary').value = text; };
+  
+    box.appendChild(div);
+  
+});
+  
+
+  
+// Pre-fill saved summary
+  
+const saved = localStorage.getItem('summary');
+  
+if (saved) document.getElementById('summary').value = saved;
+  
+
+  
+async function next() {
+  
+    const summary = document.getElementById('summary').value.trim();
+  
+    if (!summary) { alert('Please enter a professional summary!'); return; }
+  
+    localStorage.setItem('summary', summary);
+  
+    await fetch('http://localhost:5000/api/save-all', {
+  
+        method: 'POST',
+  
+        headers: { 'Content-Type': 'application/json' },
+  
+        body: JSON.stringify({ email: userEmail, summary })
+  
+    });
+  
+    window.location.href = 'page12.html';
+  
+}
+  
+</script></body></html>
